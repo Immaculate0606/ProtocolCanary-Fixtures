@@ -180,6 +180,16 @@ method = "get-network"
         report = self.run_validation({"a.toml": bad})
         self.assertTrue(any("'expect'" in e for e in report.errors))
 
+    def test_soroban_fixture_rejects_unknown_expect_kind(self) -> None:
+        # [expect] is present but its kind is not in SOROBAN_EXPECT_KINDS —
+        # a different branch of validate_soroban_body than the missing-
+        # [expect] case above.
+        bad = VALID_SOROBAN.replace(
+            'kind = "simulation-success"', 'kind = "simulation-timeout"'
+        )
+        report = self.run_validation({"a.toml": bad})
+        self.assertTrue(any("expect.kind" in e for e in report.errors))
+
     def test_rejects_invalid_base64_in_value_base64(self) -> None:
         bad = VALID_XDR.replace('value_base64 = "AAAAAA=="', 'value_base64 = "not-valid-base64!!!"')
         report = self.run_validation({"a.toml": bad})
